@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixgl.url = "github:guibou/nixGL";
 
     std = {
       url = "github:divnix/std";
@@ -22,6 +23,10 @@
     std.growOn {
       inherit inputs;
       cellsFrom = ./nix;
+      nixpkgsConfig = {
+        allowUnfree = true;
+        android_sdk.accept_license = true;
+      };
       cellBlocks = with std.blockTypes; [
         (devshells "shells")
       ];
