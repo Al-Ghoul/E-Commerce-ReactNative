@@ -9,11 +9,11 @@ in
     default = let
       # These specific versions are REQUIRED by react native
       # Please do NOT mess with them unless you know what you're doing.
-      buildToolsVersion = "34.0.0";
+      buildToolsVersion = "35.0.0";
       androidComposition = inputs.nixpkgs.androidenv.composeAndroidPackages {
         toolsVersion = null;
-        platformVersions = ["34"];
-        buildToolsVersions = [buildToolsVersion];
+        platformVersions = ["35"];
+        buildToolsVersions = [buildToolsVersion "34.0.0"];
         includeNDK = true;
         ndkVersions = ["26.1.10909125"];
         cmakeVersions = ["3.22.1"];
