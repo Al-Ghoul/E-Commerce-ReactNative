@@ -7,7 +7,7 @@ import {
 } from "react";
 import * as SecureStore from "expo-secure-store";
 
-async function save(key: string, value: JWT | null) {
+export async function saveJWT(key: string, value: JWT | null) {
   if (value === null) {
     await SecureStore.deleteItemAsync(key);
     return;
@@ -58,17 +58,17 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setJWT(JSON.parse(session));
       setIsLoading(false);
     })();
-  }, [isLoading, JWT]);
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         signIn: (JWT: JWT) => {
-          save("Auth", JWT);
+          saveJWT("Auth", JWT);
           setJWT(JWT);
         },
         signOut: () => {
-          save("Auth", null);
+          saveJWT("Auth", null);
           setJWT(null);
         },
         session: JWT,
