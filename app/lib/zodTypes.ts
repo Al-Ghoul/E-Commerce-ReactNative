@@ -24,7 +24,7 @@ export const RegisterInputClientSchema = RegisterInputSchema.extend({
     })
     .min(8, "Password must be at least 8 characters"),
 }).superRefine((val, ctx) => {
-  if (val.password != val.confirmPassword)
+  if (val.password !== val.confirmPassword)
     ctx.addIssue({
       code: "custom",
       message: "Passwords do NOT match.",
