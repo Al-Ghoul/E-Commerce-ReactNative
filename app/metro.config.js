@@ -1,4 +1,3 @@
-/*global __dirname*/
 /*eslint no-undef: "error"*/
 
 // Learn more https://docs.expo.io/guides/customizing-metro
