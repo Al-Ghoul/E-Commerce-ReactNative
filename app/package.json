@@ -16,8 +16,12 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@hookform/resolvers": "^3.9.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^6.0.2",
+    "@rn-primitives/slot": "^1.1.0",
+    "@rn-primitives/types": "^1.1.0",
+    "@tanstack/react-query": "^5.60.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "expo": "~51.0.39",
@@ -36,28 +40,33 @@
     "nativewind": "^4.1.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.53.2",
     "react-native": "0.74.5",
     "react-native-gesture-handler": "~2.16.1",
-    "react-native-reanimated": "~3.10.1",
+    "react-native-reanimated": "^3.16.1",
+    "react-native-root-toast": "^3.6.0",
     "react-native-safe-area-context": "4.10.5",
     "react-native-screens": "3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-web": "~0.19.10",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.15",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "xior": "^0.6.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@tanstack/eslint-plugin-query": "^5.60.1",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.2.45",
     "@types/react-test-renderer": "^18.0.7",
+    "eslint": "^8.57.0",
+    "eslint-config-expo": "~7.1.2",
     "jest": "^29.2.1",
     "jest-expo": "~51.0.3",
     "react-test-renderer": "18.2.0",
-    "typescript": "~5.3.3",
-    "eslint": "^8.57.0",
-    "eslint-config-expo": "~7.1.2"
+    "typescript": "~5.3.3"
   },
   "private": true
 }
