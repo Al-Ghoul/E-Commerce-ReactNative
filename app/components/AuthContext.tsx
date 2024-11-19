@@ -7,18 +7,23 @@ import {
 } from "react";
 import * as SecureStore from "expo-secure-store";
 
-async function save(key: string, value: string | null) {
+async function save(key: string, value: JWT | null) {
   if (value === null) {
     await SecureStore.deleteItemAsync(key);
     return;
   }
-  await SecureStore.setItemAsync(key, value);
+  await SecureStore.setItemAsync(key, JSON.stringify(value));
 }
 
+type JWT = {
+ access_token: string;
+ refresh_token: string;
+};
+
 const AuthContext = createContext<{
-  signIn: () => void;
+  signIn: (JWT: JWT) => void;
   signOut: () => void;
-  session?: string | null;
+  session?: JWT | null;
   isLoading: boolean;
 }>({
   signIn: () => null,
@@ -41,12 +46,16 @@ export function useSession() {
 
 export function SessionProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
-  const [JWT, setJWT] = useState<string | null>(null);
-
+  const [JWT, setJWT] = useState<JWT | null>(null);
+ 
   useEffect(() => {
     (async () => {
-      const session = await SecureStore.getItemAsync("Auth");
-      setJWT(session);
+      const session = await SecureStore.getItemAsync("Auth") as string | null;
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+      setJWT(JSON.parse(session));
       setIsLoading(false);
     })();
   }, [isLoading, JWT]);
@@ -54,9 +63,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
   return (
     <AuthContext.Provider
       value={{
-        signIn: () => {
-          save("Auth", "xxx");
-          setJWT("xxx");
+        signIn: (JWT: JWT) => {
+          save("Auth", JWT);
+          setJWT(JWT);
         },
         signOut: () => {
           save("Auth", null);
