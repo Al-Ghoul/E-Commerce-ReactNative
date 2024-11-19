@@ -124,9 +124,12 @@ export default function SignIn() {
   });
 
   return (
-    <View className="flex-1 items-center justify-center bg-background">
-      <Card className="flex max-w-md w-full">
-        <View className="flex flex-row gap-3 m-4">
+    <View className="flex-1 justify-center bg-background">
+      <View className="absolute right-5 top-14">
+        <ThemeToggle />
+      </View>
+      <Card className="max-w-md w-full self-center">
+        <View className="flex-row gap-3 m-4">
           <Pressable
             className={`flex flex-[0.5] p-2 rounded ${activeTab === "register" ? "bg-primary" : "bg-background border border-primary"}`}
             onPress={() => setActiveTab("register")}
@@ -300,10 +303,6 @@ export default function SignIn() {
             </Animated.View>
           ) : null}
         </CardContent>
-
-        <CardFooter className="justify-center">
-          <ThemeToggle />
-        </CardFooter>
       </Card>
     </View>
   );
