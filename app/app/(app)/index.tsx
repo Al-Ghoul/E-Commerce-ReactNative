@@ -1,5 +1,5 @@
-import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Index() {
-  return <View className="flex-1"></View>;
+export default function IndexPage() {
+  return <SafeAreaView className="flex-1"></SafeAreaView>;
 }

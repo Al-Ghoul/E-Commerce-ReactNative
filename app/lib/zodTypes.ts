@@ -1,4 +1,4 @@
-import {z} from "zod";
+import { z } from "zod";
 
 export const RegisterInputSchema = z.object({
   email: z
@@ -14,7 +14,6 @@ export const RegisterInputSchema = z.object({
     })
     .min(8, "Password must be at least 8 characters"),
 });
-
 
 export const RegisterInputClientSchema = RegisterInputSchema.extend({
   confirmPassword: z
@@ -37,4 +36,3 @@ export type RegisterInputClientSchemaType = z.infer<
 >;
 
 export type LoginInputClientSchemaType = z.infer<typeof RegisterInputSchema>;
-

@@ -1,8 +1,7 @@
 import { Drawer as DrawerLayout } from "react-native-drawer-layout";
 import { Text } from "./ui/text";
 import { ReactNode, useState } from "react";
-import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Drawer({
   children,
@@ -12,7 +11,6 @@ export default function Drawer({
   signOut: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const insets = useSafeAreaInsets();
 
   return (
     <DrawerLayout
@@ -22,12 +20,11 @@ export default function Drawer({
       drawerPosition="right"
       renderDrawerContent={() => {
         return (
-          <View
-            className="flex-1 items-center bg-background"
-            style={{ paddingTop: insets.top }}
-          >
-            <Text className="mt-auto mb-7" onPress={() => signOut()}>Sign Out</Text>
-          </View>
+          <SafeAreaView className="flex-1 items-center bg-background">
+            <Text className="mt-auto mb-7" onPress={() => signOut()}>
+              Sign Out
+            </Text>
+          </SafeAreaView>
         );
       }}
     >
