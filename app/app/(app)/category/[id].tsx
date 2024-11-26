@@ -4,7 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
+import { Link, Tabs, useLocalSearchParams } from "expo-router";
 import {
   Card,
   CardContent,
@@ -90,7 +90,6 @@ export default function Category() {
   }, 1000);
 
   const debouncedSubCategoriesLimitByUpdate = useDebouncedCallback(() => {
-    console.log(subCategoriesReq.data?.data.meta.total, subCategoriesLimitBy);
     if (subCategoriesReq.data?.data.meta.total > subCategoriesLimitBy) {
       setSubCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
     } else
@@ -99,24 +98,25 @@ export default function Category() {
       });
   }, 1000);
 
-  const navigation = useNavigation();
-
   return (
     <SafeAreaView className="flex-1">
-      <Stack.Screen
+      <Tabs.Screen
         options={{
           headerLeft: () => (
-            <Pressable onPress={() => navigation.goBack()}>
+            <Link href="/(app)/categories" className="mx-3">
               <FontAwesome
                 size={28}
                 name="arrow-left"
                 className="mx-3"
                 color={isDarkColorScheme ? "white" : "black"}
               />
-            </Pressable>
+            </Link>
           ),
           title: categoryName as string,
           headerRight: () => <ThemeToggle />,
+          tabBarStyle: {
+            display: "none",
+          },
         }}
       />
       {subCategoriesReq.isFetching ? (
