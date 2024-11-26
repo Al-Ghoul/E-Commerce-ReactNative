@@ -20,6 +20,7 @@ import { useColorScheme } from "@/lib/useColorScheme";
 import { useDebouncedCallback } from "use-debounce";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import FontAwesome from "@expo/vector-icons/FontAwesome5";
+import { Input } from "@/components/ui/input";
 
 export default function Category() {
   const { id, categoryName } = useLocalSearchParams();
@@ -80,6 +81,19 @@ export default function Category() {
     placeholderData: keepPreviousData,
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchCategoriesProducts = (q: string) =>
+    xiorInstance
+      .get(`/categories/${id}/products/search?q=${q}`)
+      .then((res) => Promise.resolve(res))
+      .catch((error) => Promise.reject(error));
+  const productsSearchReq = useQuery({
+    queryKey: ["products", searchQuery],
+    queryFn: () => fetchCategoriesProducts(searchQuery),
+    enabled: searchQuery.length > 0,
+  });
+
   const debouncedProductLimitByUpdate = useDebouncedCallback(() => {
     if (productsReq.data?.data.meta.total > productsLimitBy) {
       setProductsLimitBy((prevLimitBy) => prevLimitBy * 2);
@@ -128,7 +142,7 @@ export default function Category() {
         subCategoriesReq.data?.data.data.length > 1 && (
           <ScrollView
             horizontal
-            className="flex-grow-0 mx-2"
+            className="mx-2 py-5"
             onMomentumScrollEnd={debouncedSubCategoriesLimitByUpdate}
             showsHorizontalScrollIndicator={false}
           >
@@ -137,7 +151,7 @@ export default function Category() {
                 (selectedSubCategory === -1
                   ? "bg-foreground"
                   : "bg-background") +
-                " text-background items-center rounded-full border border-border h-8 ml-2 px-2.5 py-0.5"
+                " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
               }
               onPress={() => setSelectedSubCategory(-1)}
             >
@@ -160,7 +174,7 @@ export default function Category() {
                   (selectedSubCategory === category.id
                     ? "bg-foreground"
                     : "bg-background") +
-                  " text-background items-center rounded-full border border-border h-8 ml-2 px-2.5 py-0.5"
+                  " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
                 }
               >
                 <Text
@@ -178,7 +192,7 @@ export default function Category() {
         )
       )}
 
-      <View className="flex-row mt-4 mx-4 -mb-6">
+      <View className="flex-row mt-7 mx-4 -mb-6">
         <Text className="text-foreground font-semibold text-xl my-auto">
           Sort By:
         </Text>
@@ -198,11 +212,51 @@ export default function Category() {
         </Picker>
       </View>
 
+      <View className="mt-5 mx-2">
+        <Input
+          placeholder="Search products..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+
+        {productsSearchReq.isError ? (
+          <Text className="text-red-500">Something went wrong</Text>
+        ) : null}
+        {productsSearchReq.isFetching ? (
+          <View className="absolute top-3 right-3 mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
+        ) : null}
+      </View>
+
       {productsReq.isFetching ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
       ) : null}
       {productsReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
+      ) : null}
+
+      {productsSearchReq.data?.data.data.length > 0 ? (
+        <ScrollView
+          className="mx-4 mt-5"
+        >
+          {productsSearchReq.data?.data.data.map((product: Product) => (
+            <Card key={product.id} className="p-5 mb-3">
+              <CardTitle>{product.name}</CardTitle>
+              <CardHeader className="w-full flex-row justify-between py-0">
+                <Text>{product.subcategory_name}</Text>
+                <Text>{product.stock_quantity} in stock</Text>
+              </CardHeader>
+              <CardContent className="p-0 items-center mt-2">
+                <PlacerHolderImage height={200} />
+              </CardContent>
+              <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
+                <Text>${product.price}</Text>
+                <Button>
+                  <Text>Add to cart</Text>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </ScrollView>
       ) : (
         <ScrollView
           className="mx-4 mt-5"
