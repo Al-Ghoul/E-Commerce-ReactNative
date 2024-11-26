@@ -18,7 +18,7 @@ export default function AppLayout() {
 
   return (
     <Drawer signOut={signOut}>
-      <Tabs>
+      <Tabs screenOptions={{ tabBarHideOnKeyboard: true }}>
         <Tabs.Screen
           name="index"
           options={{
