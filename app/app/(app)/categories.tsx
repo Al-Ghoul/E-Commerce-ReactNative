@@ -75,7 +75,9 @@ export default function CategoriesPage() {
                   size={40}
                 />
 
-                <Text className="text-foreground my-auto">{category.name}</Text>
+                <Text className="text-foreground my-auto">
+                  {category.name}
+                </Text>
 
                 <Text>{category.description}</Text>
               </View>
