@@ -94,7 +94,6 @@ export default function SignIn() {
         .then((res) => Promise.resolve(res))
         .catch((error) => Promise.reject(error)),
     onSuccess: (res) => {
-      console.log(res.data);
       signIn({
         access_token: res.data.access_token,
         refresh_token: res.data.refresh_token,
