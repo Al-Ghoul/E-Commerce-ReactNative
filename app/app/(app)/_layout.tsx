@@ -31,7 +31,7 @@ export default function AppLayout() {
           }}
         />
         <Tabs.Screen
-          name="categories"
+          name="categories/index"
           options={{
             headerShown: true,
             headerRight: () => <ThemeToggle />,
@@ -42,7 +42,7 @@ export default function AppLayout() {
           }}
         />
         <Tabs.Screen
-          name="category/[id]"
+          name="categories/[id]/products"
           options={{
             headerShown: true,
             headerRight: () => <ThemeToggle />,

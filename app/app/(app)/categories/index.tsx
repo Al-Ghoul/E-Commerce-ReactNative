@@ -63,7 +63,7 @@ export default function CategoriesPage() {
             <Link
               key={category.id}
               href={{
-                pathname: "/(app)/category/[id]",
+                pathname: "/(app)/categories/[id]/products",
                 params: { id: category.id, categoryName: category.name },
               }}
               className="max-h-28 mb-3 text-background rounded-sm border-2 border-border px-2.5 py-0.5"
@@ -97,7 +97,7 @@ export default function CategoriesPage() {
               <Link
                 key={category.id}
                 href={{
-                  pathname: "/(app)/category/[id]",
+                  pathname: "/(app)/categories/[id]/products",
                   params: { id: category.id, categoryName: category.name },
                 }}
                 className="w-full mb-3 text-background rounded-sm border-2 max-h-28 border-border px-2.5 py-0.5"
