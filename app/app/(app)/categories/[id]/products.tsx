@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import PlacerHolderImage from "@/assets/images/placeholder.svg";
+import PlaceHolderImage from "@/assets/images/placeholder.svg";
 import { Button } from "@/components/ui/button";
 import Toast from "react-native-root-toast";
 import { Picker } from "@react-native-picker/picker";
@@ -246,7 +246,7 @@ export default function Category() {
                 <Text>{product.stock_quantity} in stock</Text>
               </CardHeader>
               <CardContent className="p-0 items-center mt-2">
-                <PlacerHolderImage height={200} />
+                <PlaceHolderImage height={200} />
               </CardContent>
               <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
                 <Text>${product.price}</Text>
@@ -271,7 +271,7 @@ export default function Category() {
                   <Text>{product.stock_quantity} in stock</Text>
                 </CardHeader>
                 <CardContent className="p-0 items-center mt-2">
-                  <PlacerHolderImage height={200} />
+                  <PlaceHolderImage height={200} />
                 </CardContent>
                 <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
                   <Text>${product.price}</Text>

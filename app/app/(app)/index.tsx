@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { xiorInstance } from "@/lib/fetcher";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,8 +18,11 @@ import { Picker } from "@react-native-picker/picker";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { useDebouncedCallback } from "use-debounce";
 import Toast from "react-native-root-toast";
+import { CartItemInputSchemaType } from "@/lib/zodTypes";
+import { useSession } from "@/components/AuthContext";
 
 export default function IndexPage() {
+  const { session } = useSession();
   const { isDarkColorScheme } = useColorScheme();
 
   const categoriesOffset = 0;
@@ -85,6 +88,18 @@ export default function IndexPage() {
         duration: Toast.durations.LONG,
       });
   }, 1000);
+
+  const cartReq = useQuery({
+    queryKey: ["userCart", session?.userId],
+    queryFn: () => xiorInstance.get(`/users/${session?.userId}/carts`),
+    enabled: !!session?.userId,
+  });
+
+  const createCartItemReq = useMutation({
+    mutationKey: ["userCart", cartReq.data?.data.data.id],
+    mutationFn: (ItemData: CartItemInputSchemaType) =>
+      xiorInstance.post(`/carts/${cartReq.data?.data.data.id}/items`, ItemData),
+  });
 
   return (
     <SafeAreaView className="flex-1">
@@ -194,7 +209,25 @@ export default function IndexPage() {
               </CardContent>
               <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
                 <Text>${product.price}</Text>
-                <Button>
+                <Button
+                  disabled={
+                    createCartItemReq.isPending || product.stock_quantity === 0
+                  }
+                  onPress={() => {
+                    createCartItemReq
+                      .mutateAsync({
+                        product_id: product.id.toString(),
+                        quantity: 1,
+                      })
+                      .then(() => {
+                        Toast.show(`${product.name} added to cart`);
+                      })
+                      .catch((err) => {
+                        const data = err.response.data;
+                        Toast.show(data.message || data.detail);
+                      });
+                  }}
+                >
                   <Text>Add to cart</Text>
                 </Button>
               </CardFooter>
@@ -215,7 +248,25 @@ export default function IndexPage() {
               </CardContent>
               <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
                 <Text>${product.price}</Text>
-                <Button>
+                <Button
+                  disabled={
+                    createCartItemReq.isPending || product.stock_quantity === 0
+                  }
+                  onPress={() => {
+                    createCartItemReq
+                      .mutateAsync({
+                        product_id: product.id.toString(),
+                        quantity: 1,
+                      })
+                      .then(() => {
+                        Toast.show(`${product.name} added to cart`);
+                      })
+                      .catch((err) => {
+                        const data = err.response.data;
+                        Toast.show(data.message || data.detail);
+                      });
+                  }}
+                >
                   <Text>Add to cart</Text>
                 </Button>
               </CardFooter>

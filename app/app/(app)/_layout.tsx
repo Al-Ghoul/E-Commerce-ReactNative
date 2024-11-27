@@ -42,6 +42,17 @@ export default function AppLayout() {
           }}
         />
         <Tabs.Screen
+          name="cart/index"
+          options={{
+            headerShown: true,
+            headerRight: () => <ThemeToggle />,
+            title: "Cart",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome size={28} name="opencart" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="categories/[id]/products"
           options={{
             headerShown: true,
