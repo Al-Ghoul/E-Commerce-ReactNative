@@ -125,7 +125,7 @@ export default function CartPage() {
                       Toast.show("Order placed successfully");
                       cartReq.refetch();
                       cartItemsReq.refetch();
-                      // router.replace("/orders");
+                      router.replace("/orders");
                     })
                     .catch((err) => {
                       const data = err.response.data;
