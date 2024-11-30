@@ -68,7 +68,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           return result;
         },
         async (error) => {
-          if (error?.request?.url?.endsWith("/carts")) {
+          if (error.request?.url?.endsWith("/carts") && error.request.method === "GET") {
             const req = await xiorInstance.post(
               `/users/${session.userId}/carts`,
             );
