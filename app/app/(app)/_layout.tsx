@@ -4,6 +4,8 @@ import { useSession } from "@/components/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Drawer from "@/components/Drawer";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+
 
 export default function AppLayout() {
   const { session, isLoading, signOut } = useSession();
@@ -49,6 +51,17 @@ export default function AppLayout() {
             title: "Cart",
             tabBarIcon: ({ color }) => (
               <FontAwesome size={28} name="opencart" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="orders/index"
+          options={{
+            headerShown: true,
+            headerRight: () => <ThemeToggle />,
+            title: "Orders",
+            tabBarIcon: ({ color }) => (
+              <FontAwesome6 size={28} name="money-check-dollar" color={color} />
             ),
           }}
         />
