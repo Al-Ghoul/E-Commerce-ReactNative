@@ -4,8 +4,7 @@ import { useSession } from "@/components/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Drawer from "@/components/Drawer";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function AppLayout() {
   const { session, isLoading, signOut } = useSession();
@@ -67,6 +66,22 @@ export default function AppLayout() {
         />
         <Tabs.Screen
           name="categories/[id]/products"
+          options={{
+            headerShown: true,
+            headerRight: () => <ThemeToggle />,
+            href: null,
+          }}
+        />{" "}
+        <Tabs.Screen
+          name="orders/[id]/checkout"
+          options={{
+            headerShown: true,
+            headerRight: () => <ThemeToggle />,
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="orders/[id]/details"
           options={{
             headerShown: true,
             headerRight: () => <ThemeToggle />,

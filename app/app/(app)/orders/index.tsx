@@ -15,12 +15,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { useDebouncedCallback } from "use-debounce";
-import Toast from "react-native-root-toast";
+import { useColorScheme } from "@/lib/useColorScheme";
+import { router } from "expo-router";
 
 export default function OrdersPage() {
   const { session } = useSession();
+  const { isDarkColorScheme } = useColorScheme();
+  const ordersOffset = 0;
   const [ordersLimitBy, setOrdersLimitBy] = useState(4);
-  const [ordersOffset, setOrdersOffset] = useState(0);
 
   const ordersReq = useQuery({
     queryKey: ["orders", ordersLimitBy, ordersOffset],
@@ -66,7 +68,7 @@ export default function OrdersPage() {
         renderItem={({ item }) => (
           <Card id={item.id} className="mb-3">
             <CardHeader className="flex-row justify-between">
-              <CardTitle>Order #{item.id}</CardTitle>
+              <CardTitle>Order {item.id}</CardTitle>
               <Text
                 className={`${statusColors[item.fulfillment_status as keyof typeof statusColors]} rounded-full px-2 py-1`}
               >
@@ -82,14 +84,23 @@ export default function OrdersPage() {
               </Text>
             </CardContent>
 
-            <CardFooter className="flex-row justify-between">
-              <Button>
+            <CardFooter className="flex-1 gap-2 flex-row justify-between">
+              <Button
+                onPress={() => router.push(`/orders/${item.id}/details`)}
+                variant={isDarkColorScheme ? "default" : "outline"}
+                className="flex-1"
+              >
                 <Text>Details</Text>
               </Button>
-
-              <Button variant="secondary">
-                <Text>Checkout</Text>
-              </Button>
+              {item.fulfillment_status === "pending" ? (
+                <Button
+                  onPress={() => router.push(`/orders/${item.id}/checkout`)}
+                  variant={isDarkColorScheme ? "secondary" : "default"}
+                  className="flex-1"
+                >
+                  <Text>Checkout</Text>
+                </Button>
+              ) : null}
             </CardFooter>
           </Card>
         )}
