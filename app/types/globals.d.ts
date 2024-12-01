@@ -1,4 +1,4 @@
-export { };
+export {};
 
 declare global {
   type JWT = {
@@ -46,5 +46,15 @@ declare global {
     quantity: number;
     name: string;
     description: string;
+  }
+
+  interface OrderItem {
+    created_at: Date;
+    id: number;
+    order_id: number;
+    price_at_purchase: number;
+    product_id: number;
+    quantity: number;
+    updated_at: Date;
   }
 }
