@@ -108,8 +108,8 @@ export default function IndexPage() {
       {categoriesReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
       ) : null}
-      
-      {categoriesReq.data?.data.data.length > 1 && (
+
+      {categoriesReq.data?.data.data?.length > 1 && (
         <ScrollView
           horizontal
           className="mx-2 py-5"
@@ -121,7 +121,10 @@ export default function IndexPage() {
               (selectedCategory === -1 ? "bg-foreground" : "bg-background") +
               " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
             }
-            onPress={() => setSelectedCategory(-1)}
+            onPress={() => {
+              setProductsKeyword("");
+              setSelectedCategory(-1);
+            }}
           >
             <Text
               className={
@@ -135,7 +138,10 @@ export default function IndexPage() {
           {categoriesReq.data?.data.data.map((category: Category) => (
             <Pressable
               key={category.id}
-              onPress={() => setSelectedCategory(category.id)}
+              onPress={() => {
+                setProductsKeyword("");
+                setSelectedCategory(category.id);
+              }}
               className={
                 (selectedCategory === category.id
                   ? "bg-foreground"

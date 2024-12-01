@@ -162,7 +162,10 @@ export default function Category() {
               (selectedSubCategory === -1 ? "bg-foreground" : "bg-background") +
               " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
             }
-            onPress={() => setSelectedSubCategory(-1)}
+            onPress={() => {
+              setSearchQuery("");
+              setSelectedSubCategory(-1);
+            }}
           >
             <Text
               className={
@@ -178,7 +181,10 @@ export default function Category() {
           {subCategoriesReq.data?.data.data.map((category: Category) => (
             <Pressable
               key={category.id}
-              onPress={() => setSelectedSubCategory(category.id)}
+              onPress={() => {
+                setSearchQuery("");
+                setSelectedSubCategory(category.id);
+              }}
               className={
                 (selectedSubCategory === category.id
                   ? "bg-foreground"
