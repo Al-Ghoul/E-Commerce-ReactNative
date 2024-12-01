@@ -64,7 +64,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
       xiorInstance.interceptors.response.use(
         (result) => {
-          const { data, request: config, response: originalResponse } = result;
           return result;
         },
         async (error) => {
