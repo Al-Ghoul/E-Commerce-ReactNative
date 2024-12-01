@@ -108,6 +108,7 @@ export default function IndexPage() {
       {categoriesReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
       ) : null}
+      
       {categoriesReq.data?.data.data.length > 1 && (
         <ScrollView
           horizontal
