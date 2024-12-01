@@ -1,18 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
-import PlacerHolderImage from "@/assets/images/placeholder.svg";
 import { Input } from "@/components/ui/input";
 import { Picker } from "@react-native-picker/picker";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -20,6 +11,8 @@ import { useDebouncedCallback } from "use-debounce";
 import Toast from "react-native-root-toast";
 import { CartItemInputSchemaType } from "@/lib/zodTypes";
 import { useSession } from "@/components/AuthContext";
+import { FlatList } from "react-native-gesture-handler";
+import ProductCard from "@/components/ProductCard";
 
 export default function IndexPage() {
   const { session } = useSession();
@@ -80,11 +73,20 @@ export default function IndexPage() {
     placeholderData: keepPreviousData,
   });
 
-  const debouncedCategoriesLimitByUpdate = useDebouncedCallback(() => {
+  const categoriesLimitByUpdate = useDebouncedCallback(() => {
     if (categoriesReq.data?.data.meta.total > categoriesLimitBy) {
       setCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
     } else
       Toast.show("No more categories", {
+        duration: Toast.durations.LONG,
+      });
+  }, 1000);
+
+  const productsLimitByUpdate = useDebouncedCallback(() => {
+    if (productsReq.data?.data.meta.total > productsLimitBy) {
+      setProductsLimitBy((prevLimitBy) => prevLimitBy * 2);
+    } else
+      Toast.show("No more products", {
         duration: Toast.durations.LONG,
       });
   }, 1000);
@@ -102,66 +104,57 @@ export default function IndexPage() {
   });
 
   return (
-    <SafeAreaView className="flex-1">
-      {categoriesReq.isFetching ? (
-        <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-      ) : null}
+    <SafeAreaView>
       {categoriesReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-      ) : (
-        categoriesReq.data?.data.data.length > 1 && (
-          <ScrollView
-            horizontal
-            className="mx-2 py-5"
-            onMomentumScrollEnd={debouncedCategoriesLimitByUpdate}
-            showsHorizontalScrollIndicator={false}
+      ) : null}
+      {categoriesReq.data?.data.data.length > 1 && (
+        <ScrollView
+          horizontal
+          className="mx-2 py-5"
+          onMomentumScrollEnd={categoriesLimitByUpdate}
+          showsHorizontalScrollIndicator={false}
+        >
+          <Pressable
+            className={
+              (selectedCategory === -1 ? "bg-foreground" : "bg-background") +
+              " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
+            }
+            onPress={() => setSelectedCategory(-1)}
           >
-            <Pressable
+            <Text
               className={
-                (selectedCategory === -1 ? "bg-foreground" : "bg-background") +
+                selectedCategory === -1 ? "text-background" : "text-foreground"
+              }
+            >
+              All
+            </Text>
+          </Pressable>
+
+          {categoriesReq.data?.data.data.map((category: Category) => (
+            <Pressable
+              key={category.id}
+              onPress={() => setSelectedCategory(category.id)}
+              className={
+                (selectedCategory === category.id
+                  ? "bg-foreground"
+                  : "bg-background") +
                 " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
               }
-              onPress={() => setSelectedCategory(-1)}
             >
               <Text
                 className={
-                  selectedCategory === -1
+                  selectedCategory === category.id
                     ? "text-background"
                     : "text-foreground"
                 }
               >
-                All
+                {category.name}
               </Text>
             </Pressable>
-
-            {categoriesReq.data?.data.data.map((category: Category) => (
-              <Pressable
-                key={category.id}
-                onPress={() => setSelectedCategory(category.id)}
-                className={
-                  (selectedCategory === category.id
-                    ? "bg-foreground"
-                    : "bg-background") +
-                  " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
-                }
-              >
-                <Text
-                  className={
-                    selectedCategory === category.id
-                      ? "text-background"
-                      : "text-foreground"
-                  }
-                >
-                  {category.name}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        )
+          ))}
+        </ScrollView>
       )}
-      {productsReq.isPending ? (
-        <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-      ) : null}
       <View className="flex-row mx-4">
         <Text className="text-foreground font-semibold text-xl my-auto">
           Sort By:
@@ -195,84 +188,43 @@ export default function IndexPage() {
           <View className="absolute top-3 right-3 mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
         ) : null}
       </View>
+
+      {productsReq.isPending ? (
+        <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
+      ) : null}
+
       {productsSearchReq.data?.data.data.length > 0 ? (
-        <ScrollView className="mx-2">
-          {productsSearchReq.data?.data.data.map((product: Product) => (
-            <Card key={product.id} className="p-5 mb-3">
-              <CardTitle>{product.name}</CardTitle>
-              <CardHeader className="w-full flex-row justify-between py-0">
-                <Text>{product.subcategory_name}</Text>
-                <Text>{product.stock_quantity} in stock</Text>
-              </CardHeader>
-              <CardContent className="p-0 items-center mt-2">
-                <PlacerHolderImage height={200} />
-              </CardContent>
-              <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
-                <Text>${product.price}</Text>
-                <Button
-                  disabled={
-                    createCartItemReq.isPending || product.stock_quantity === 0
-                  }
-                  onPress={() => {
-                    createCartItemReq
-                      .mutateAsync({
-                        product_id: product.id.toString(),
-                        quantity: 1,
-                      })
-                      .then(() => {
-                        Toast.show(`${product.name} added to cart`);
-                      })
-                      .catch((err) => {
-                        const data = err.response.data;
-                        Toast.show(data.message || data.detail);
-                      });
-                  }}
-                >
-                  <Text>Add to cart</Text>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </ScrollView>
+        <FlatList
+          refreshControl={
+            <RefreshControl
+              refreshing={productsSearchReq.isFetching}
+              onRefresh={productsSearchReq.refetch}
+            />
+          }
+          onEndReachedThreshold={0.5}
+          onEndReached={productsLimitByUpdate}
+          data={productsSearchReq.data?.data.data}
+          renderItem={({ item }) => (
+            <ProductCard product={item} createCartItemReq={createCartItemReq} />
+          )}
+          className="mx-2"
+        />
       ) : (
-        <ScrollView className="mx-2">
-          {productsReq.data?.data.data.map((product: Product) => (
-            <Card key={product.id} className="p-5 mb-3">
-              <CardTitle>{product.name}</CardTitle>
-              <CardHeader className="w-full flex-row justify-between py-0">
-                <Text>{product.subcategory_name}</Text>
-                <Text>{product.stock_quantity} in stock</Text>
-              </CardHeader>
-              <CardContent className="p-0 items-center mt-2">
-                <PlacerHolderImage height={200} />
-              </CardContent>
-              <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
-                <Text>${product.price}</Text>
-                <Button
-                  disabled={
-                    createCartItemReq.isPending || product.stock_quantity === 0
-                  }
-                  onPress={() => {
-                    createCartItemReq
-                      .mutateAsync({
-                        product_id: product.id.toString(),
-                        quantity: 1,
-                      })
-                      .then(() => {
-                        Toast.show(`${product.name} added to cart`);
-                      })
-                      .catch((err) => {
-                        const data = err.response.data;
-                        Toast.show(data.message || data.detail);
-                      });
-                  }}
-                >
-                  <Text>Add to cart</Text>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </ScrollView>
+        <FlatList
+          refreshControl={
+            <RefreshControl
+              refreshing={productsReq.isFetching}
+              onRefresh={productsReq.refetch}
+            />
+          }
+          onEndReachedThreshold={0.5}
+          onEndReached={productsLimitByUpdate}
+          data={productsReq.data?.data.data}
+          renderItem={({ item }) => (
+            <ProductCard product={item} createCartItemReq={createCartItemReq} />
+          )}
+          className="mx-2"
+        />
       )}
     </SafeAreaView>
   );

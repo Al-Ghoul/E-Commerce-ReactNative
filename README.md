@@ -21,7 +21,7 @@ dev # Starts the emulator, development server and app
 #cd to your project
 nix develop . # Depends on ur internet speed, sit back, relax and watch the magic happens.
 
-dev # Starts the emulator, development server and app
+dev # Starts the emulator, development serve, builds and run the app
 ```
 
 # Technologies Used
