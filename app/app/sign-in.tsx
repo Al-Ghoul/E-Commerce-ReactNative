@@ -1,4 +1,4 @@
-import { useSession } from "@/components/AuthContext";
+import { parseJwt, useSession } from "@/components/AuthContext";
 import { Pressable, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Controller, useForm } from "react-hook-form";
@@ -94,10 +94,13 @@ export default function SignIn() {
         .then((res) => Promise.resolve(res))
         .catch((error) => Promise.reject(error)),
     onSuccess: (res) => {
+      const userId = parseJwt(res.data.access_token).sub.split("|")[1];
       signIn({
         access_token: res.data.access_token,
         refresh_token: res.data.refresh_token,
+        userId: userId,
       });
+
       router.replace("/");
       Toast.show("Logged in successfully", {
         duration: Toast.durations.LONG,
