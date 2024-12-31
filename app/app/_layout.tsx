@@ -11,6 +11,8 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { SessionProvider } from "@/components/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RootSiblingParent } from "react-native-root-siblings";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -25,6 +27,7 @@ const DARK_THEME: Theme = {
 
 const queryClient = new QueryClient();
 
+export { ErrorBoundary } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -62,9 +65,13 @@ export default function RootLayout() {
       <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
       <QueryClientProvider client={queryClient}>
         <RootSiblingParent>
-          <SessionProvider>
-            <Slot />
-          </SessionProvider>
+          <SafeAreaProvider>
+            <GestureHandlerRootView>
+              <SessionProvider>
+                <Slot />
+              </SessionProvider>
+            </GestureHandlerRootView>
+          </SafeAreaProvider>
         </RootSiblingParent>
       </QueryClientProvider>
     </ThemeProvider>
