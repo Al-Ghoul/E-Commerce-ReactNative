@@ -26,6 +26,7 @@ declare global {
     subcategory_id: number;
     updated_at: Date;
     subcategory_name: string;
+    image: string | null;
   }
 
   type CartStatus = "active" | "archived" | "checked_out";
