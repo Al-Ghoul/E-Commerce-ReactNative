@@ -11,6 +11,7 @@ import { Text } from "./ui/text";
 import { XiorResponse } from "xior";
 import { type UseMutationResult } from "@tanstack/react-query";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
+import { Image } from "react-native";
 
 export default function ({
   product,
@@ -35,7 +36,11 @@ export default function ({
         <Text>{product.stock_quantity} in stock</Text>
       </CardHeader>
       <CardContent className="p-0 items-center mt-2">
-        <PlaceHolderImage height={200} />
+        {product.image ? (
+          <Image src={product.image} className="w-full h-40" />
+        ) : (
+          <PlaceHolderImage />
+        )}
       </CardContent>
       <CardFooter className="flex-row justify-between mt-4 mb-0 p-0">
         <Text>${product.price}</Text>
