@@ -25,6 +25,8 @@ import { XiorError } from "xior";
 import Animated, { SlideInLeft, SlideOutRight } from "react-native-reanimated";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { router } from "expo-router";
+import { showToastable } from "react-native-toastable";
+import { Check } from "lucide-react-native";
 
 export default function SignIn() {
   const { signIn } = useSession();
@@ -64,9 +66,17 @@ export default function SignIn() {
         .then((res) => Promise.resolve(res))
         .catch((error) => Promise.reject(error)),
     onSuccess: (res) => {
-      Toast.show(res.data.message, {
-        duration: Toast.durations.LONG,
+      showToastable({
+        renderContent: () => (
+          <View className="flex-row gap-2 p-4 bg-green-800 rounded-lg">
+            <Check color="#FFF" size={20} className="self-center" />
+            <Text className="text-background">{res.data.message}</Text>
+          </View>
+        ),
+        message: undefined,
+        duration: 2000,
       });
+
       setActiveTab("login");
     },
     onError: (error) => {
@@ -94,6 +104,17 @@ export default function SignIn() {
         .then((res) => Promise.resolve(res))
         .catch((error) => Promise.reject(error)),
     onSuccess: (res) => {
+      showToastable({
+        renderContent: () => (
+          <View className="flex-row gap-2 p-4 bg-green-800 rounded-lg">
+            <Check color="#FFF" size={20} className="self-center" />
+            <Text className="text-background">Logged in successfully</Text>
+          </View>
+        ),
+        message: undefined,
+        duration: 2000,
+      });
+
       const userId = parseJwt(res.data.access_token).sub.split("|")[1];
       signIn({
         access_token: res.data.access_token,
@@ -102,9 +123,6 @@ export default function SignIn() {
       });
 
       router.replace("/");
-      Toast.show("Logged in successfully", {
-        duration: Toast.durations.LONG,
-      });
     },
     onError: (error) => {
       if (error instanceof XiorError) {
