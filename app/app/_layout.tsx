@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RootSiblingParent } from "react-native-root-siblings";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toastable from "react-native-toastable";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -68,6 +69,7 @@ export default function RootLayout() {
           <SafeAreaProvider>
             <GestureHandlerRootView>
               <SessionProvider>
+                <Toastable />
                 <Slot />
               </SessionProvider>
             </GestureHandlerRootView>
