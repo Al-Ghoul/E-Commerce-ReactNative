@@ -13,7 +13,7 @@ import { type UseMutationResult } from "@tanstack/react-query";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
 import { Image } from "react-native";
 
-export default function ({
+export default function ProductCard ({
   product,
   createCartItemReq,
 }: {
