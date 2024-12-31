@@ -23,7 +23,6 @@ const AuthContext = createContext<{
   isLoading: false,
 });
 
-// This hook can be used to access the user info.
 export function useSession() {
   const value = useContext(AuthContext);
   if (process.env.NODE_ENV !== "production") {
@@ -40,77 +39,98 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [JWT, setJWT] = useState<JWT | null>(null);
 
   useEffect(() => {
-    (async () => {
+    const currSession = JSON.parse(
+      SecureStore.getItem("Auth") as string,
+    ) as JWT | null;
+
+    if (currSession) {
+      setJWT(currSession);
+      addAuthHeader(currSession.access_token);
+    }
+
+    xiorInstance.interceptors.response.use(
+      (result) => {
+        return result;
+      },
+      async (error) => {
+        if (
+          error.request?.url?.endsWith("/refresh") &&
+          error.request.method === "POST"
+        ) {
+          saveJWT("Auth", null);
+          setJWT(null);
+          xiorInstance.interceptors.request.clear();
+        } else if (
+          error.request?.url?.endsWith("/carts") &&
+          error.request.method === "GET" &&
+          error.response?.status === 404
+        ) {
+          const req = await xiorInstance.post(error.request.url);
+          return Promise.resolve(req);
+        }
+
+        return Promise.reject(error);
+      },
+    );
+
+    function shouldRefresh(response: XiorResponse) {
       const session = JSON.parse(
-        (await SecureStore.getItemAsync("Auth")) as string,
+        SecureStore.getItem("Auth") as string,
       ) as JWT | null;
-      if (!session) {
-        setIsLoading(false);
-        return;
-      }
-      setJWT(session);
-      setIsLoading(false);
-      addAuthHeader(session.access_token);
 
-      xiorInstance.plugins.use(
-        errorRetry({
-          enableRetry: (config, error) => {
-            if (error?.response && shouldRefresh(error.response)) {
-              return true;
-            }
-          },
-        }),
-      );
-
-      xiorInstance.interceptors.response.use(
-        (result) => {
-          return result;
-        },
-        async (error) => {
-          if (error.request?.url?.endsWith("/carts") && error.request.method === "GET") {
-            const req = await xiorInstance.post(
-              `/users/${session.userId}/carts`,
-            );
-            return Promise.resolve(req);
-          }
-          return Promise.reject(error);
-        },
-      );
-
-      function shouldRefresh(response: XiorResponse) {
-        return Boolean(
-          session?.access_token &&
+      return Boolean(
+        session?.access_token &&
           response?.status &&
           [401, 403].includes(response.status),
-        );
-      }
+      );
+    }
 
-      setupTokenRefresh(xiorInstance, {
-        shouldRefresh,
-        async refreshToken(error) {
-          try {
-            const { data } = await xiorInstance.post("/auth/refresh", {
-              refresh_token: session.refresh_token,
-            });
-            if (data) {
-              const userId = parseJwt(data.access_token).sub.split("|")[1];
-              const jwtWithUserId = { ...data, userId: userId };
-              saveJWT("Auth", jwtWithUserId);
-              setJWT(jwtWithUserId);
-              xiorInstance.interceptors.request.clear();
-              addAuthHeader(data.access_token);
-            } else {
-              throw error;
-            }
-          } catch {
-            saveJWT("Auth", null);
-            xiorInstance.interceptors.request.clear();
-            setJWT(null);
-            return Promise.reject(error);
+    xiorInstance.plugins.use(
+      errorRetry({
+        enableRetry: (_, error) => {
+          if (error?.response && shouldRefresh(error.response)) {
+            return true;
           }
         },
-      });
-    })();
+      }),
+    );
+
+    setupTokenRefresh(xiorInstance, {
+      shouldRefresh,
+      async refreshToken(error) {
+        try {
+          const session = JSON.parse(
+            SecureStore.getItem("Auth") as string,
+          ) as JWT | null;
+          const { data, status } = await xiorInstance.post("/auth/refresh", {
+            refresh_token: session?.refresh_token,
+          });
+          if (status === 200 && data) {
+            const userId = parseJwt(data.access_token).sub.split("|")[1];
+            const jwtWithUserId = { ...data, userId: userId };
+            saveJWT("Auth", jwtWithUserId);
+            setJWT(jwtWithUserId);
+            xiorInstance.interceptors.request.clear();
+            addAuthHeader(data.access_token);
+          } else {
+            saveJWT("Auth", null);
+            setJWT(null);
+            throw error;
+          }
+        } catch {
+          saveJWT("Auth", null);
+          setJWT(null);
+          return Promise.reject(error);
+        }
+      },
+    });
+
+    setIsLoading(false);
+
+    return () => {
+      xiorInstance.interceptors.request.clear();
+      xiorInstance.interceptors.response.clear();
+    };
   }, []);
 
   return (
