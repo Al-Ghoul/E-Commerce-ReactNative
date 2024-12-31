@@ -5,12 +5,17 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import Drawer from "@/components/Drawer";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AppLayout() {
   const { session, isLoading, signOut } = useSession();
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center">
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
   }
 
   if (!session) {
@@ -71,7 +76,7 @@ export default function AppLayout() {
             headerRight: () => <ThemeToggle />,
             href: null,
           }}
-        />{" "}
+        />
         <Tabs.Screen
           name="orders/[id]/checkout"
           options={{
