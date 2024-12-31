@@ -49,7 +49,7 @@ export default function RootLayout() {
       }
       setIsColorSchemeLoaded(true);
     })().finally(() => {
-      SplashScreen.hideAsync();
+      SplashScreen.hide();
     });
   }, [colorScheme, setColorScheme]);
 
