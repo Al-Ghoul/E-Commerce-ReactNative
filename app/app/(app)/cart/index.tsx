@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { xiorInstance } from "@/lib/fetcher";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, View, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "~/components/ui/text";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
@@ -34,7 +34,7 @@ export default function CartPage() {
     queryFn: () =>
       xiorInstance
         .get(`/users/${session?.userId}/carts`)
-        .then((data) => Promise.resolve(data))
+        .then((res) => Promise.resolve(res.data))
         .catch((error) => Promise.reject(error)),
     enabled: !!session?.userId,
   });
@@ -42,15 +42,18 @@ export default function CartPage() {
   const cartItemsReq = useQuery({
     queryKey: ["cartItems"],
     queryFn: () =>
-      xiorInstance.get(`/carts/${cartReq.data?.data.data.id}/items`),
-    enabled: !!cartReq.data?.data.data.id,
+      xiorInstance
+        .get(`/carts/${cartReq.data?.data?.id}/items`)
+        .then((res) => Promise.resolve(res.data))
+        .catch((error) => Promise.reject(error)),
+    enabled: !!cartReq.data?.data?.id,
   });
 
   const updateCartItemReq = useMutation({
     mutationKey: ["cartItem"],
     mutationFn: (input: CartItemInputType) =>
       xiorInstance
-        .patch(`/carts/${cartReq.data?.data.data.id}/items/${input.itemId}`, {
+        .patch(`/carts/${cartReq.data?.data?.id}/items/${input.itemId}`, {
           quantity: input.quantity,
         })
         .then((res) => Promise.resolve(res))
@@ -61,7 +64,7 @@ export default function CartPage() {
     mutationKey: ["cartItem"],
     mutationFn: (itemId: number) =>
       xiorInstance
-        .delete(`/carts/${cartReq.data?.data.data.id}/items/${itemId}`)
+        .delete(`/carts/${cartReq.data?.data?.id}/items/${itemId}`)
         .then((res) => Promise.resolve(res))
         .catch((error) => Promise.reject(error)),
   });
@@ -81,13 +84,13 @@ export default function CartPage() {
 
   useEffect(() => {
     const newTotal =
-      cartItemsReq.data?.data.data.reduce(
+      cartItemsReq.data?.data?.reduce(
         (sum: number, item: CartItemWithPrice) =>
           sum + item.price * item.quantity,
         0,
       ) || 0;
     setTotalPrice(newTotal);
-  }, [cartItemsReq.data?.data.data]);
+  }, [cartItemsReq.data?.data]);
 
   return (
     <SafeAreaView className="flex-1 p-2">
@@ -95,13 +98,13 @@ export default function CartPage() {
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
       ) : null}
 
-      {cartItemsReq.data?.data.data.length > 0 ? (
+      {cartItemsReq.data?.data?.length > 0 ? (
         <>
           <Card className="-mt-8">
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
               <CardContent>
-                {cartItemsReq.data?.data.data.map((item: CartItemWithPrice) => (
+                {cartItemsReq.data?.data?.map((item: CartItemWithPrice) => (
                   <View key={item.id} className="flex-row justify-between mt-3">
                     <Text>
                       {item.name} (x{item.quantity})
@@ -120,7 +123,7 @@ export default function CartPage() {
                 className="w-full mt-4"
                 onPress={() => {
                   createOrderReq
-                    .mutateAsync(Number(cartReq.data?.data.data.id))
+                    .mutateAsync(Number(cartReq.data?.data?.id))
                     .then(() => {
                       Toast.show("Order placed successfully");
                       cartReq.refetch();
@@ -139,7 +142,7 @@ export default function CartPage() {
           </Card>
         </>
       ) : (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-row justify-center">
           <EvilIcons
             name="cart"
             size={32}
@@ -158,12 +161,16 @@ export default function CartPage() {
           />
         }
       >
-        {cartItemsReq.data?.data.data.map((item: CartItemWithPrice) => (
+        {cartItemsReq.data?.data?.map((item: CartItemWithPrice) => (
           <Card key={item.id}>
-            <CardHeader className="flex-row justify-between">
-              <PlaceHolderImage height={80} width={90} />
+            <CardHeader className="flex-row justify-between max-w-80 gap-2">
+              {item.image ? (
+                <Image src={item.image} className="w-60 h-40" />
+              ) : (
+                <PlaceHolderImage  height={160} width={240} />
+              )}
               <View className="mt-5">
-                <CardTitle>{item.name}</CardTitle>
+                <CardTitle className="text-wrap">{item.name}</CardTitle>
                 <Text>{item.description}</Text>
               </View>
             </CardHeader>
