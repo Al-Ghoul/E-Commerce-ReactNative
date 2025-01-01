@@ -47,6 +47,7 @@ declare global {
     quantity: number;
     name: string;
     description: string;
+    image: string | null;
   }
 
   interface OrderItem {
