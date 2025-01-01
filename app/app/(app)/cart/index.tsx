@@ -11,7 +11,13 @@ import { Separator } from "@/components/ui/separator";
 import { xiorInstance } from "@/lib/fetcher";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View, Image } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  View,
+  Image,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "~/components/ui/text";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
@@ -19,6 +25,8 @@ import EvilIcons from "@expo/vector-icons/EvilIcons";
 import { useColorScheme } from "@/lib/useColorScheme";
 import Toast from "react-native-root-toast";
 import { router } from "expo-router";
+import { showToastable } from "react-native-toastable";
+import { Check, X } from "lucide-react-native";
 
 interface CartItemInputType {
   itemId: number;
@@ -125,14 +133,40 @@ export default function CartPage() {
                   createOrderReq
                     .mutateAsync(Number(cartReq.data?.data?.id))
                     .then(() => {
-                      Toast.show("Order placed successfully");
+                      showToastable({
+                        renderContent: () => (
+                          <View className="flex-row gap-2 p-4 bg-green-800 rounded-lg">
+                            <Check
+                              color="#FFF"
+                              size={20}
+                              className="self-center"
+                            />
+                            <Text className="text-background">
+                              Order placed successfully
+                            </Text>
+                          </View>
+                        ),
+                        message: undefined,
+                        duration: 2000,
+                      });
                       cartReq.refetch();
                       cartItemsReq.refetch();
                       router.replace("/orders");
                     })
                     .catch((err) => {
                       const data = err.response.data;
-                      Toast.show(data.message || data.detail);
+                      showToastable({
+                        renderContent: () => (
+                          <View className="flex-row gap-2 p-4 bg-red-800 rounded-lg">
+                            <X color="#FFF" size={20} className="self-center" />
+                            <Text className="text-background">
+                              {data.message || data.detail}
+                            </Text>
+                          </View>
+                        ),
+                        message: undefined,
+                        duration: 2000,
+                      });
                     });
                 }}
               >
@@ -167,7 +201,7 @@ export default function CartPage() {
               {item.image ? (
                 <Image src={item.image} className="w-60 h-40" />
               ) : (
-                <PlaceHolderImage  height={160} width={240} />
+                <PlaceHolderImage height={160} width={240} />
               )}
               <View className="mt-5">
                 <CardTitle className="text-wrap">{item.name}</CardTitle>

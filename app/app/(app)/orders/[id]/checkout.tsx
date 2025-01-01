@@ -19,9 +19,10 @@ import { Controller, useForm } from "react-hook-form";
 import { ScrollView, View } from "react-native";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
-import Toast from "react-native-root-toast";
 import { Separator } from "@/components/ui/separator";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { showToastable } from "react-native-toastable";
+import { Check, X } from "lucide-react-native";
 
 const steps = ["Shipping", "Payment", "Review"];
 
@@ -473,15 +474,61 @@ export default function CheckoutPage() {
                               payment_method: "credit_card",
                             })
                             .then(() => {
+                              showToastable({
+                                renderContent: () => (
+                                  <View className="flex-row gap-2 p-4 bg-green-800 rounded-lg">
+                                    <Check
+                                      color="#FFF"
+                                      size={20}
+                                      className="self-center"
+                                    />
+                                    <Text className="text-background">
+                                      Order placed successfully
+                                    </Text>
+                                  </View>
+                                ),
+                                message: undefined,
+                                duration: 2000,
+                              });
                               router.push(`/orders/${id}/details`);
                             })
                             .catch((error) => {
-                              Toast.show(error.detail);
+                              showToastable({
+                                renderContent: () => (
+                                  <View className="flex-row gap-2 p-4 bg-red-800 rounded-lg">
+                                    <X
+                                      color="#FFF"
+                                      size={20}
+                                      className="self-center"
+                                    />
+                                    <Text className="text-background">
+                                      {error.detail}
+                                    </Text>
+                                  </View>
+                                ),
+                                message: undefined,
+                                duration: 2000,
+                              });
                             });
                         })();
                       })
                       .catch((error) => {
-                        Toast.show(error.detail);
+                        showToastable({
+                          renderContent: () => (
+                            <View className="flex-row gap-2 p-4 bg-red-800 rounded-lg">
+                              <X
+                                color="#FFF"
+                                size={20}
+                                className="self-center"
+                              />
+                              <Text className="text-background">
+                                {error.detail}
+                              </Text>
+                            </View>
+                          ),
+                          message: undefined,
+                          duration: 2000,
+                        });
                       });
                   })}
                 >
