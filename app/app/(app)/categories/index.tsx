@@ -1,13 +1,10 @@
-import { Text } from "@/components/ui/text";
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { View, FlatList, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Input } from "@/components/ui/input";
 import CategoryCard from "@/components/CategoryCard";
 import { useDebouncedCallback } from "use-debounce";
-import Toast from "react-native-root-toast";
 import SearchBar from "@/components/core/commerce/SearchBar";
 
 export default function CategoriesPage() {

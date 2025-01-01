@@ -1,7 +1,6 @@
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Dispatch, useState } from "react";
-import Toast from "react-native-root-toast";
 import { useDebouncedCallback } from "use-debounce";
 import { FlatList, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
