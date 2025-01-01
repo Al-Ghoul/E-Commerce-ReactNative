@@ -1,7 +1,7 @@
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, View } from "react-native";
+import { Dispatch, SetStateAction, useState } from "react";
+import { RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
@@ -13,29 +13,16 @@ import { CartItemInputSchemaType } from "@/lib/zodTypes";
 import { useSession } from "@/components/AuthContext";
 import { FlatList } from "react-native-gesture-handler";
 import ProductCard from "@/components/ProductCard";
+import Categories from "@/components/core/commerce/Categories";
 
 export default function IndexPage() {
   const { session } = useSession();
-  const { isDarkColorScheme } = useColorScheme();
-
-  const categoriesOffset = 0;
-  const [categoriesLimitBy, setCategoriesLimitBy] = useState(8);
-  const fetchCategories = (offset: number, limitBy: number) =>
-    xiorInstance
-      .get(`/categories/?limit=${limitBy}&offset=${offset}`)
-      .then((data) => Promise.resolve(data))
-      .catch((error) => Promise.reject(error));
-  const categoriesReq = useQuery({
-    queryKey: ["categories", categoriesOffset, categoriesLimitBy],
-    queryFn: () => fetchCategories(categoriesOffset, categoriesLimitBy),
-    placeholderData: keepPreviousData,
-  });
 
   const [productsKeyword, setProductsKeyword] = useState("");
   const fetchCategoriesByKeyword = (q: string) =>
     xiorInstance
       .get(`/products/search?q=${q}`)
-      .then((data) => Promise.resolve(data))
+      .then((res) => Promise.resolve(res.data))
       .catch((error) => Promise.reject(error));
   const productsSearchReq = useQuery({
     queryKey: ["products", productsKeyword],
@@ -58,7 +45,7 @@ export default function IndexPage() {
       .get(
         `/products?limit=${limitBy}&offset=${offset}&category=${category_id}&sortBy=${sortBy === "priceHigh" ? "price" : sortBy === "priceLow" ? "price" : sortBy}&orderBy=${sortBy === "priceHigh" ? "desc" : sortBy === "priceLow" ? "asc" : "asc"}`,
       )
-      .then((data) => Promise.resolve(data))
+      .then((res) => Promise.resolve(res.data))
       .catch((error) => Promise.reject(error));
   const productsReq = useQuery({
     queryKey: [
@@ -73,17 +60,8 @@ export default function IndexPage() {
     placeholderData: keepPreviousData,
   });
 
-  const categoriesLimitByUpdate = useDebouncedCallback(() => {
-    if (categoriesReq.data?.data.meta.total > categoriesLimitBy) {
-      setCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
-    } else
-      Toast.show("No more categories", {
-        duration: Toast.durations.LONG,
-      });
-  }, 1000);
-
   const productsLimitByUpdate = useDebouncedCallback(() => {
-    if (productsReq.data?.data.meta.total > productsLimitBy) {
+    if (productsReq.data?.meta.total > productsLimitBy) {
       setProductsLimitBy((prevLimitBy) => prevLimitBy * 2);
     } else
       Toast.show("No more products", {
@@ -105,117 +83,51 @@ export default function IndexPage() {
 
   return (
     <SafeAreaView>
-      {categoriesReq.isPending ? (
-        <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-      ) : null}
+      <Categories
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        onCategoryPress={() => setProductsKeyword("")}
+      />
 
-      {categoriesReq.data?.data.data?.length > 1 && (
-        <ScrollView
-          horizontal
-          className="mx-2 py-5"
-          onMomentumScrollEnd={categoriesLimitByUpdate}
-          showsHorizontalScrollIndicator={false}
-        >
-          <Pressable
-            className={
-              (selectedCategory === -1 ? "bg-foreground" : "bg-background") +
-              " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
-            }
-            onPress={() => {
-              setProductsKeyword("");
-              setSelectedCategory(-1);
-            }}
-          >
-            <Text
-              className={
-                selectedCategory === -1 ? "text-background" : "text-foreground"
-              }
-            >
-              All
-            </Text>
-          </Pressable>
+      <ProductsFilter
+        filterBy={sortBy}
+        setFilterBy={setSortBy}
+        onFilterByChange={() => setProductsLimitBy(8)}
+      />
 
-          {categoriesReq.data?.data.data.map((category: Category) => (
-            <Pressable
-              key={category.id}
-              onPress={() => {
-                setProductsKeyword("");
-                setSelectedCategory(category.id);
-              }}
-              className={
-                (selectedCategory === category.id
-                  ? "bg-foreground"
-                  : "bg-background") +
-                " text-background items-center rounded-full self-center border border-border h-8 ml-2 px-2.5 py-0.5"
-              }
-            >
-              <Text
-                className={
-                  selectedCategory === category.id
-                    ? "text-background"
-                    : "text-foreground"
-                }
-              >
-                {category.name}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      )}
-      <View className="flex-row mx-4">
-        <Text className="text-foreground font-semibold text-xl my-auto">
-          Sort By:
-        </Text>
-        <Picker
-          style={{ flex: 1, color: isDarkColorScheme ? "white" : "black" }}
-          selectedValue={sortBy}
-          onValueChange={useDebouncedCallback((item) => {
-            setSortBy(item);
-            setProductsLimitBy(8);
-          }, 1000)}
-          dropdownIconColor={isDarkColorScheme ? "white" : "black"}
-          mode="dialog"
-        >
-          <Picker.Item label="Name" value="name" />
-          <Picker.Item label="Price: High to Low" value="priceHigh" />
-          <Picker.Item label="Price: Low to High" value="priceLow" />
-        </Picker>
-      </View>
-      <View className="mb-4 mx-2">
-        <Input
-          placeholder="Search products..."
-          value={productsKeyword}
-          onChangeText={setProductsKeyword}
-        />
-
-        {productsSearchReq.isError ? (
-          <Text className="text-red-500">Something went wrong</Text>
-        ) : null}
-        {productsSearchReq.isFetching ? (
-          <View className="absolute top-3 right-3 mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-        ) : null}
-      </View>
+      <ProductsSearch
+        productsKeyword={productsKeyword}
+        setProductsKeyword={setProductsKeyword}
+        isLoading={productsSearchReq.isFetching}
+        isError={productsSearchReq.isError}
+      />
 
       {productsReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
       ) : null}
 
-      {productsSearchReq.data?.data.data.length > 0 ? (
-        <FlatList
-          refreshControl={
-            <RefreshControl
-              refreshing={productsSearchReq.isFetching}
-              onRefresh={productsSearchReq.refetch}
-            />
-          }
-          onEndReachedThreshold={0.5}
-          onEndReached={productsLimitByUpdate}
-          data={productsSearchReq.data?.data.data}
-          renderItem={({ item }) => (
-            <ProductCard product={item} createCartItemReq={createCartItemReq} />
-          )}
-          className="mx-2"
-        />
+      {productsSearchReq.data?.data?.length > 0 ? (
+        <>
+          <Text className="text-center">Search Results:</Text>
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={productsSearchReq.isFetching}
+                onRefresh={productsSearchReq.refetch}
+              />
+            }
+            onEndReachedThreshold={0.5}
+            onEndReached={productsLimitByUpdate}
+            data={productsSearchReq.data?.data}
+            renderItem={({ item }) => (
+              <ProductCard
+                product={item}
+                createCartItemReq={createCartItemReq}
+              />
+            )}
+            className="mx-2"
+          />
+        </>
       ) : (
         <FlatList
           refreshControl={
@@ -224,9 +136,10 @@ export default function IndexPage() {
               onRefresh={productsReq.refetch}
             />
           }
+          showsVerticalScrollIndicator={false}
           onEndReachedThreshold={0.5}
           onEndReached={productsLimitByUpdate}
-          data={productsReq.data?.data.data}
+          data={productsReq.data?.data}
           renderItem={({ item }) => (
             <ProductCard product={item} createCartItemReq={createCartItemReq} />
           )}
@@ -234,5 +147,71 @@ export default function IndexPage() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function ProductsFilter({
+  filterBy,
+  setFilterBy,
+  onFilterByChange,
+}: {
+  filterBy: string;
+  setFilterBy: Dispatch<SetStateAction<string>>;
+  onFilterByChange: () => void;
+}) {
+  const { isDarkColorScheme } = useColorScheme();
+
+  return (
+    <View className="flex-row mx-4">
+      <Text className="text-foreground font-semibold text-xl my-auto">
+        Sort By:
+      </Text>
+      <Picker
+        style={{ flex: 1, color: isDarkColorScheme ? "white" : "black" }}
+        selectedValue={filterBy}
+        onValueChange={useDebouncedCallback((item) => {
+          setFilterBy(item);
+          onFilterByChange();
+        }, 1000)}
+        dropdownIconColor={isDarkColorScheme ? "white" : "black"}
+        mode="dialog"
+      >
+        <Picker.Item label="Name" value="name" />
+        <Picker.Item label="Price: High to Low" value="priceHigh" />
+        <Picker.Item label="Price: Low to High" value="priceLow" />
+      </Picker>
+    </View>
+  );
+}
+
+function ProductsSearch({
+  isError,
+  isLoading,
+  productsKeyword,
+  setProductsKeyword,
+}: {
+  isError: boolean;
+  isLoading: boolean;
+  productsKeyword: string;
+  setProductsKeyword: Dispatch<SetStateAction<string>>;
+}) {
+  return (
+    <View className="mb-4 mx-2">
+      <Input
+        placeholder="Search products..."
+        value={productsKeyword}
+        onChangeText={setProductsKeyword}
+      />
+
+      {isError ? (
+        <Text className="text-red-500 text-center">
+          Something went wrong while searching
+        </Text>
+      ) : null}
+
+      {isLoading ? (
+        <View className="absolute top-3 right-3 mx-auto w-5 h-5 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
+      ) : null}
+    </View>
   );
 }
