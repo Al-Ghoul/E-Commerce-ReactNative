@@ -11,9 +11,11 @@ import { Text } from "./ui/text";
 import { XiorResponse } from "xior";
 import { type UseMutationResult } from "@tanstack/react-query";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
+import { showToastable } from "react-native-toastable";
+import { Check, X } from "lucide-react-native";
 
-export default function ProductCard ({
+export default function ProductCard({
   product,
   createCartItemReq,
 }: {
@@ -53,7 +55,18 @@ export default function ProductCard ({
                 quantity: 1,
               })
               .then(() => {
-                Toast.show(`${product.name} added to cart`);
+                showToastable({
+                  renderContent: () => (
+                    <View className="flex-row gap-2 p-4 bg-green-800 rounded-lg">
+                      <Check color="#FFF" size={20} className="self-center" />
+                      <Text className="text-background">
+                        {`${product.name} added to cart`}
+                      </Text>
+                    </View>
+                  ),
+                  message: undefined,
+                  duration: 2000,
+                });
               })
               .catch((err) => {
                 const data = err.response.data;
