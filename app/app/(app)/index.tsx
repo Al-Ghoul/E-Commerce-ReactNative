@@ -5,7 +5,6 @@ import { RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { useDebouncedCallback } from "use-debounce";
-import Toast from "react-native-root-toast";
 import { CartItemInputSchemaType } from "@/lib/zodTypes";
 import { useSession } from "@/components/AuthContext";
 import { FlatList } from "react-native-gesture-handler";

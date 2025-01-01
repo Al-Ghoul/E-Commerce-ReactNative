@@ -13,7 +13,7 @@ import { type UseMutationResult } from "@tanstack/react-query";
 import PlaceHolderImage from "@/assets/images/placeholder.svg";
 import { Image, View } from "react-native";
 import { showToastable } from "react-native-toastable";
-import { Check, X } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 
 export default function ProductCard({
   product,
