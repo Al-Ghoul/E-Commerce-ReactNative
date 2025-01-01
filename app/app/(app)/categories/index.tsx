@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import CategoryCard from "@/components/CategoryCard";
 import { useDebouncedCallback } from "use-debounce";
 import Toast from "react-native-root-toast";
+import SearchBar from "@/components/core/commerce/SearchBar";
 
 export default function CategoriesPage() {
   const [query, setQuery] = useState("");
@@ -46,20 +47,13 @@ export default function CategoriesPage() {
 
   return (
     <SafeAreaView className="flex-1 p-2">
-      <View className="mx-2 mb-4">
-        <Input
-          placeholder="Search categories..."
-          value={query}
-          onChangeText={setQuery}
-        />
-
-        {categoriesSearchReq.isError ? (
-          <Text className="text-red-500">Something went wrong</Text>
-        ) : null}
-        {categoriesSearchReq.isFetching ? (
-          <View className="absolute top-3 right-3 mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-        ) : null}
-      </View>
+      <SearchBar
+        isError={categoriesSearchReq.isError}
+        isLoading={categoriesSearchReq.isFetching}
+        searchKeyword={query}
+        setSearchKeyword={setQuery}
+        placeHolder="categories"
+      />
 
       {categoriesReq.isPending ? (
         <View className="mx-auto w-6 h-6 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
@@ -86,7 +80,7 @@ export default function CategoriesPage() {
               onRefresh={categoriesReq.refetch}
             />
           }
-          data={categoriesReq.data.data}
+          data={categoriesReq.data?.data}
           renderItem={({ item }) => <CategoryCard category={item} />}
           onEndReachedThreshold={0.5}
           onEndReached={categoriesLimitByUpdate}
