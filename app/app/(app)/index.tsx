@@ -62,10 +62,7 @@ export default function IndexPage() {
   const productsLimitByUpdate = useDebouncedCallback(() => {
     if (productsReq.data?.meta.total > productsLimitBy) {
       setProductsLimitBy((prevLimitBy) => prevLimitBy * 2);
-    } else
-      Toast.show("No more products", {
-        duration: Toast.durations.LONG,
-      });
+    } 
   }, 1000);
 
   const cartReq = useQuery({
