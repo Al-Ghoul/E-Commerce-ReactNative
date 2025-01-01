@@ -39,10 +39,7 @@ export default function SubCategories({
   const subCategoriesLimitByUpdate = useDebouncedCallback(() => {
     if (subCategoriesReq.data?.meta.total > subCategoriesLimitBy) {
       setSubCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
-    } else
-      Toast.show("No more subcategories", {
-        duration: Toast.durations.LONG,
-      });
+    }
   }, 1000);
 
   return (

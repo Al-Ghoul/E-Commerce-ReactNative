@@ -1,7 +1,6 @@
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Dispatch, useState } from "react";
-import Toast from "react-native-root-toast";
 import { useDebouncedCallback } from "use-debounce";
 import { FlatList, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
@@ -31,10 +30,7 @@ export default function Categories({
   const categoriesLimitByUpdate = useDebouncedCallback(() => {
     if (categoriesReq.data?.meta.total > categoriesLimitBy) {
       setCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
-    } else
-      Toast.show("No more categories", {
-        duration: Toast.durations.LONG,
-      });
+    }
   }, 2000);
 
   return (

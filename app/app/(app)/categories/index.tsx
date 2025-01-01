@@ -39,10 +39,7 @@ export default function CategoriesPage() {
   const categoriesLimitByUpdate = useDebouncedCallback(() => {
     if (categoriesReq.data?.meta.total > categoriesLimitBy) {
       setCategoriesLimitBy((prevLimitBy) => prevLimitBy * 2);
-    } else
-      Toast.show("No more categories", {
-        duration: Toast.durations.LONG,
-      });
+    }
   }, 1000);
 
   return (
