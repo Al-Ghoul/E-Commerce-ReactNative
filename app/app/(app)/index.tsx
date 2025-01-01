@@ -1,12 +1,9 @@
 import { xiorInstance } from "@/lib/fetcher";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
-import { Input } from "@/components/ui/input";
-import { Picker } from "@react-native-picker/picker";
-import { useColorScheme } from "@/lib/useColorScheme";
 import { useDebouncedCallback } from "use-debounce";
 import Toast from "react-native-root-toast";
 import { CartItemInputSchemaType } from "@/lib/zodTypes";
@@ -14,6 +11,8 @@ import { useSession } from "@/components/AuthContext";
 import { FlatList } from "react-native-gesture-handler";
 import ProductCard from "@/components/ProductCard";
 import Categories from "@/components/core/commerce/Categories";
+import SearchBar from "@/components/core/commerce/SearchBar";
+import SortBy from "@/components/core/commerce/SortBy";
 
 export default function IndexPage() {
   const { session } = useSession();
@@ -71,14 +70,18 @@ export default function IndexPage() {
 
   const cartReq = useQuery({
     queryKey: ["userCart", session?.userId],
-    queryFn: () => xiorInstance.get(`/users/${session?.userId}/carts`),
+    queryFn: () =>
+      xiorInstance
+        .get(`/users/${session?.userId}/carts`)
+        .then((res) => Promise.resolve(res.data))
+        .catch((error) => Promise.reject(error)),
     enabled: !!session?.userId,
   });
 
   const createCartItemReq = useMutation({
-    mutationKey: ["userCart", cartReq.data?.data.data.id],
+    mutationKey: ["userCart", cartReq.data?.data?.id],
     mutationFn: (ItemData: CartItemInputSchemaType) =>
-      xiorInstance.post(`/carts/${cartReq.data?.data.data.id}/items`, ItemData),
+      xiorInstance.post(`/carts/${cartReq.data?.data?.id}/items`, ItemData),
   });
 
   return (
@@ -89,17 +92,18 @@ export default function IndexPage() {
         onCategoryPress={() => setProductsKeyword("")}
       />
 
-      <ProductsFilter
-        filterBy={sortBy}
-        setFilterBy={setSortBy}
-        onFilterByChange={() => setProductsLimitBy(8)}
+      <SortBy
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        onSortByChange={() => setProductsLimitBy(8)}
       />
 
-      <ProductsSearch
-        productsKeyword={productsKeyword}
-        setProductsKeyword={setProductsKeyword}
+      <SearchBar
+        searchKeyword={productsKeyword}
+        setSearchKeyword={setProductsKeyword}
         isLoading={productsSearchReq.isFetching}
         isError={productsSearchReq.isError}
+        placeHolder="products"
       />
 
       {productsReq.isPending ? (
@@ -147,71 +151,5 @@ export default function IndexPage() {
         />
       )}
     </SafeAreaView>
-  );
-}
-
-function ProductsFilter({
-  filterBy,
-  setFilterBy,
-  onFilterByChange,
-}: {
-  filterBy: string;
-  setFilterBy: Dispatch<SetStateAction<string>>;
-  onFilterByChange: () => void;
-}) {
-  const { isDarkColorScheme } = useColorScheme();
-
-  return (
-    <View className="flex-row mx-4">
-      <Text className="text-foreground font-semibold text-xl my-auto">
-        Sort By:
-      </Text>
-      <Picker
-        style={{ flex: 1, color: isDarkColorScheme ? "white" : "black" }}
-        selectedValue={filterBy}
-        onValueChange={useDebouncedCallback((item) => {
-          setFilterBy(item);
-          onFilterByChange();
-        }, 1000)}
-        dropdownIconColor={isDarkColorScheme ? "white" : "black"}
-        mode="dialog"
-      >
-        <Picker.Item label="Name" value="name" />
-        <Picker.Item label="Price: High to Low" value="priceHigh" />
-        <Picker.Item label="Price: Low to High" value="priceLow" />
-      </Picker>
-    </View>
-  );
-}
-
-function ProductsSearch({
-  isError,
-  isLoading,
-  productsKeyword,
-  setProductsKeyword,
-}: {
-  isError: boolean;
-  isLoading: boolean;
-  productsKeyword: string;
-  setProductsKeyword: Dispatch<SetStateAction<string>>;
-}) {
-  return (
-    <View className="mb-4 mx-2">
-      <Input
-        placeholder="Search products..."
-        value={productsKeyword}
-        onChangeText={setProductsKeyword}
-      />
-
-      {isError ? (
-        <Text className="text-red-500 text-center">
-          Something went wrong while searching
-        </Text>
-      ) : null}
-
-      {isLoading ? (
-        <View className="absolute top-3 right-3 mx-auto w-5 h-5 rounded-full animate-spin border-y border-solid border-primary border-t-transparent"></View>
-      ) : null}
-    </View>
   );
 }
